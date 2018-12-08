@@ -80,7 +80,6 @@
         </a>
       </li>
     </ul>
-    <div>nihao</div>
   </div>
 </template>
 
