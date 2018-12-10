@@ -4,7 +4,7 @@
             <div class="menu-wrapper" v-show="ifTitleandMenuShow" 
             :class="{'hide-box-shadow':ifsetfontsize || !ifTitleandMenuShow}">
                 <div class="icon-wrapper">
-                    <span class="icon-menu icon"></span>
+                    <span class="icon-menu icon" @click="showsetting(3)"></span>
                 </div>
                 <div class="icon-wrapper">
                     <span class="icon-progress icon"  @click="showsetting(2)"></span>
@@ -64,23 +64,46 @@
                 </div>
             </div>
         </transition>
+        <contentView v-show="ifshowContent"
+            :navigation="navigation"
+            :bookContentAvailable="bookContentAvailable"
+            @jumpTo="jumpTo"></contentView>
+        <transition name="fade">
+            <div class="content-mask"
+                 v-show="ifshowContent"
+                 @click="hideContent">              
+            </div>
+        </transition>
     </div>
 </template>
 
 <script>
+import contentView from './Content';
 export default {
     data(){
         return{
             ifsetfontsize:false,
             // 设置切换的标签标记
             setTag:0,
-            progress:0        
+            progress:0,
+            //目录灰色窗口
+            ifshowContent:false   
         }
+    },
+    components:{
+        contentView
     },
     methods:{
         showsetting(index){
-            this.ifsetfontsize = true;
-            this.setTag = index;
+            if(index === 3){
+                this.ifsetfontsize = false;
+                this.ifshowContent = true;
+                this.setTag = index;
+                console.log(1);
+            }else{
+                this.ifsetfontsize = true;
+                this.setTag = index;
+            }   
         },
         hidefontsetting(){
             this.ifsetfontsize = false;
@@ -92,12 +115,18 @@ export default {
         setThemeStyle(index){
             this.$emit('setThemeStyle',index);
         },
+        jumpTo(href){
+            this.$emit('jumpTo',href);
+        },
         onProgressChange(progress){
             this.$emit('onProgressChange',progress);
         },
         onProgressIput(progress){
             this.progress = progress;
             this.$refs.progress.style.backgroundSize = `${this.progress}% 100%`;
+        },
+        hideContent(){
+            this.ifshowContent = false;
         }
     },
     props:{
@@ -111,7 +140,9 @@ export default {
         defaultFontSize: Number,
         themesList:Array,
         defaultTheme:Number,
-        bookAvailable:Boolean
+        bookAvailable:Boolean,
+        navigation:Object,
+        bookContentAvailable:Boolean
     }
 }
 </script>
@@ -272,6 +303,16 @@ export default {
             flex: 1;
             @include center;
         }
+    }
+    .content-mask{
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        z-index: 101;
+        width: 100%;
+        height: 100%;
+        background: rgba(51,51,51,.8);
+        // display: flex;
     }
 }
 

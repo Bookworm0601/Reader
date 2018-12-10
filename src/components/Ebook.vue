@@ -20,6 +20,9 @@
                  :themesList="themesList"
                  :bookAvailable="bookAvailable"
                  @onProgressChange="onProgressChange"
+                 :navigation="navigation"
+                 @jumpTo="jumpTo"
+                 :bookContentAvailable="bookContentAvailable"
             ref="MenuBar"></MenuBar>
     </div>
 </template>
@@ -84,9 +87,25 @@ export default {
             // 默认的主题
             defaultTheme: 0,
             bookAvailable: false,
+            navigation:{},
+            bookContentAvailable: false
         }
     },
     methods: {
+        // 目录跳转
+        jumpTo(href){
+            this.renditon.display(href);
+            this.hideTitleAndMenu();
+        },
+        hideTitleAndMenu(){
+            // 隐藏上下边栏
+            this.ifTitleandMenuShow = false;
+            // 隐藏设置栏
+            this.$refs.MenuBar.hidefontsetting();
+            // 隐藏目录栏
+            this.$refs.MenuBar.hideContent();
+            
+        },
         // progress 进度条的数值 (0-100)
         onProgressChange(progress){
             const percentage = progress / 100;
@@ -142,13 +161,14 @@ export default {
             // 获取locations对象
             // 通过epubjs的钩子函数来实现
             this.book.ready.then(()=>{
-                console.log(111)
+                this.navigation = this.book.navigation;
+                if(this.navigation){
+                    this.bookContentAvailable = true;
+                }
                 return this.book.locations.generate();
             }).then(result=>{
                 this.locations = this.book.locations;
                 this.bookAvailable = true;
-                console.log(result)
-                console.log('this.bookAvailable'+this.bookAvailable)
             })
         },
         prevPage(){
@@ -167,7 +187,7 @@ export default {
             this.ifTitleandMenuShow = !this.ifTitleandMenuShow;
             if(!this.ifTitleandMenuShow)
             // $refs直接对dom进行选择操作，起先要在标签中申明
-                this.$refs.MenuBar.hidefontsetting();
+            this.$refs.MenuBar.hidefontsetting();
         }
     },
     components:{
@@ -184,6 +204,7 @@ export default {
 @import '~@/assets/styles/global.scss';
 .ebook{
     position: relative;
+    overflow: hidden;
     .mask{
         position: absolute;
         top:0;
